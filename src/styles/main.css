@@ -1,0 +1,90 @@
+/* styles/main.css */
+:root {
+  --primary: #0d0d0d;
+  --secondary: #1a1a1a;
+  --accent: #d4af37; /* Oro */
+  --light: #f8f9fa;
+  --danger: #dc3545;
+}
+
+body {
+  background-color: var(--primary);
+  color: var(--light);
+  font-family: 'Montserrat', sans-serif;
+}
+
+.bg-black-gradient {
+  background: linear-gradient(to right, #000000, #1a1a1a);
+}
+
+.text-gold {
+  color: var(--accent);
+}
+
+.btn-gold {
+  background-color: var(--accent);
+  color: var(--primary);
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.btn-gold:hover {
+  background-color: #f1c40f;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(212, 175, 55, 0.3);
+}
+
+.home-container {
+  height: calc(100vh - 56px); /* Restar altura del navbar */
+}
+
+.carousel-container {
+  height: 100%;
+}
+
+.casino-carousel {
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.casino-carousel img {
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(0.7);
+}
+
+.carousel-caption {
+  background: rgba(0, 0, 0, 0.5);
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.form-section {
+  background: var(--secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.form-container {
+  width: 100%;
+  padding: 2rem;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Efectos para los juegos */
+.card-game {
+  transition: all 0.3s ease;
+  border: 1px solid var(--accent);
+}
+
+.card-game:hover {
+  transform: scale(1.03);
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+}

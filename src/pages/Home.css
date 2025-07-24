@@ -1,0 +1,66 @@
+/* General */
+.home-container {
+  height: 100vh;
+  overflow: hidden;
+  background: linear-gradient(145deg, #000000, #1a1a1a);
+  font-family: 'Cinzel', serif;
+  color: white;
+}
+
+/* Casino style theme */
+.casino-theme {
+  background-color: #0d0d0d;
+}
+
+.text-gold {
+  color: #FFD700 !important;
+}
+
+/* Carrusel */
+.carousel-container {
+  height: 100%;
+  position: relative;
+}
+
+.carousel-inner {
+  height: 100%;
+  animation: fadeIn 1s ease-in-out;
+}
+
+.carousel-item img {
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.8;
+}
+
+.carousel-caption {
+  position: absolute;
+  bottom: 20%;
+  left: 10%;
+  z-index: 10;
+  color: #FFD700;
+  text-shadow: 1px 1px 8px black;
+}
+
+.carousel-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+}
+
+.carousel-desc {
+  font-size: 1.2rem;
+}
+
+/* Formulario */
+.form-container {
+  width: 80%;
+  background: rgba(20, 20, 20, 0.95);
+  border: 1px solid #FFD700;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
