@@ -1,0 +1,83 @@
+/* components/AuthForms.css */
+.auth-form {
+  background: rgba(26, 26, 26, 0.9);
+  padding: 2.5rem;
+  border-radius: 10px;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  transition: all 0.5s ease;
+}
+
+.auth-form:hover {
+  box-shadow: 0 10px 30px rgba(212, 175, 55, 0.2);
+  border-color: rgba(212, 175, 55, 0.6);
+}
+
+.auth-form h3 {
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  position: relative;
+  padding-bottom: 0.5rem;
+}
+
+.auth-form h3::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50px;
+  height: 2px;
+  background: linear-gradient(to right, transparent, #d4af37, transparent);
+}
+
+.form-control {
+  background-color: rgba(0, 0, 0, 0.3) !important;
+  border: 1px solid #333;
+  color: #fff !important;
+  padding: 0.75rem 1rem;
+  transition: all 0.3s ease;
+}
+
+.form-control:focus {
+  border-color: #d4af37;
+  box-shadow: 0 0 0 0.25rem rgba(212, 175, 55, 0.25);
+  background-color: rgba(0, 0, 0, 0.5) !important;
+}
+
+.form-label {
+  color: #d4af37;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.btn-link {
+  color: #d4af37 !important;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.btn-link:hover {
+  text-decoration: underline;
+  transform: translateY(-2px);
+}
+
+/* Efecto de flotación para el formulario */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+.auth-form {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Efecto para los inputs */
+.form-control {
+  position: relative;
+}
+
+.form-control:focus {
+  background-image: linear-gradient(to right, rgba(212, 175, 55, 0.1), transparent);
+}
