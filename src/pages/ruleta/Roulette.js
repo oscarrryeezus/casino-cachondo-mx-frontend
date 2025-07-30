@@ -17,8 +17,9 @@ const RouletteGame = () => {
   const [showWinAnimation, setShowWinAnimation] = useState(false);
   const [showLoseAnimation, setShowLoseAnimation] = useState(false);
   const [history, setHistory] = useState([]);
-  const [, ] = useState();
+  const [,] = useState();
   const audioRef = useRef(null);
+  const audioPerder = useRef(null);
 
   const validateInputs = () => {
     if (!apuesta || isNaN(apuesta) || parseFloat(apuesta) <= 0) {
@@ -52,7 +53,7 @@ const RouletteGame = () => {
         color,
         numero
       })
-    
+
       const data = await response.data
 
       const { numeroGanador, colorGanador, resultado, montoGanado, fondosActuales } = data
@@ -68,13 +69,14 @@ const RouletteGame = () => {
         setResult(resultData);
         if (resultado === "ganado") {
           setShowWinAnimation(true);
+          audioRef.current?.play();
         } else {
           setShowLoseAnimation(true)
+          audioPerder.current?.play();
         }
 
         setHistory(prev => [...prev, resultData].slice(-5));
         setSpinning(false);
-        audioRef.current?.play();
 
         setTimeout(() => setShowWinAnimation(false), 4000);
         setTimeout(() => setShowLoseAnimation(false), 4000);
@@ -91,6 +93,7 @@ const RouletteGame = () => {
   return (
     <Box sx={{ position: 'relative', minHeight: '100vh', backgroundColor: '#111', color: '#fff', p: 4 }}>
       <audio ref={audioRef} src="/quepasa.mp3" preload="auto" />
+      <audio ref={audioPerder} src='/perder.mp3' preload='auto' />
 
       <Typography variant="h4" align="center" gutterBottom sx={{ fontWeight: 'bold', color: '#f1c40f' }}>
         Ruleta Ganadora
@@ -106,7 +109,8 @@ const RouletteGame = () => {
         />
       </Box>
 
-      <Grid container spacing={2} justifyContent="center" sx={{ maxWidth: 500, mx: 'auto' }}>
+      <Grid container spacing={2} justifyContent="center" sx={{ maxWidth: 600, mx: 'auto', color: 'white' }}>
+        {/* Campo de Monto a apostar */}
         <Grid item xs={12}>
           <TextField
             fullWidth
@@ -114,19 +118,50 @@ const RouletteGame = () => {
             label="Monto a apostar"
             value={apuesta}
             onChange={(e) => setApuesta(e.target.value)}
-            sx={{ input: { color: '#fff' } }}
+            sx={{
+              '& .MuiInputBase-root': { color: 'white' },
+              '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.23)' },
+              '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.5)' }
+            }}
             InputLabelProps={{ style: { color: '#aaa' } }}
+            InputProps={{
+              inputProps: {
+                min: 0,
+              }
+            }}
           />
         </Grid>
 
+        {/* Selector de Color */}
         <Grid item xs={12}>
           <TextField
-            select
             fullWidth
+            select
             label="Color (opcional)"
             value={color}
+            sx={{
+              '& .MuiInputBase-root': { color: 'white' },
+              '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.23)' },
+              '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.5)' },
+              width: '250px'
+            }}
             onChange={(e) => setColor(e.target.value)}
             InputLabelProps={{ style: { color: '#aaa' } }}
+            SelectProps={{
+              MenuProps: {
+                PaperProps: {
+                  sx: {
+                    bgcolor: '#424242',
+                    '& .MuiMenuItem-root': {
+                      color: 'white',
+                      '&:hover': {
+                        bgcolor: 'rgba(255, 255, 255, 0.1)'
+                      }
+                    }
+                  }
+                }
+              }
+            }}
           >
             <MenuItem value="">Sin color</MenuItem>
             {colors.map((c) => (
@@ -135,6 +170,7 @@ const RouletteGame = () => {
           </TextField>
         </Grid>
 
+        {/* Campo de Número exacto */}
         <Grid item xs={12}>
           <TextField
             fullWidth
@@ -142,15 +178,44 @@ const RouletteGame = () => {
             label="Número exacto (0-36, opcional)"
             value={numero}
             onChange={(e) => setNumero(e.target.value)}
-            sx={{ input: { color: '#fff' } }}
+            sx={{
+              '& .MuiInputBase-root': { color: 'white' },
+              '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.23)' },
+              '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.5)' },
+              width: '250px'
+            }}
             InputLabelProps={{ style: { color: '#aaa' } }}
+            InputProps={{
+              inputProps: {
+                min: 0,
+                max: 36,
+              }
+            }}
           />
         </Grid>
 
+        {/* Botón de Apostar */}
         <Grid item xs={12}>
-          <Button variant="contained" color="success" fullWidth onClick={playRoulette} disabled={spinning}>
+          <Button
+            variant="contained"
+            color="success"
+            fullWidth
+            onClick={playRoulette}
+            disabled={spinning}
+            sx={{
+              fontWeight: 'bold',
+              fontSize: '1.1rem',
+              py: 1.5,
+              textTransform: 'none',
+              '&:hover': {
+                transform: 'scale(1.01)',
+                boxShadow: '0 0 10px rgba(76, 175, 80, 0.5)'
+              }
+            }}
+          >
             {spinning ? 'Girando...' : 'Apostar y Ganar'}
           </Button>
+
         </Grid>
 
         {error && (
@@ -159,9 +224,20 @@ const RouletteGame = () => {
           </Grid>
         )}
 
-        {result && (
+        {(result && showWinAnimation) && (
           <Grid item xs={12}>
             <Alert severity="success">
+              Número ganador: <strong>{result.numeroGanador}</strong> — Color: <strong>{result.colorGanador}</strong><br />
+              Resultado: <strong>{result.resultado.toUpperCase()}</strong><br />
+              Ganancia: <strong>${result.montoGanado.toFixed(2)}</strong><br />
+              Fondos simulados: ${result.fondosActuales.toFixed(2)}
+            </Alert>
+          </Grid>
+        )}
+
+        {(result && showLoseAnimation) && (
+          <Grid item xs={12}>
+            <Alert severity="error">
               Número ganador: <strong>{result.numeroGanador}</strong> — Color: <strong>{result.colorGanador}</strong><br />
               Resultado: <strong>{result.resultado.toUpperCase()}</strong><br />
               Ganancia: <strong>${result.montoGanado.toFixed(2)}</strong><br />
@@ -175,7 +251,7 @@ const RouletteGame = () => {
         {showWinAnimation && (
           <>
             <motion.img
-              src="/karely.jpeg"
+              src="/money.gif"
               initial={{ x: '-100%', opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: '-100%', opacity: 0 }}
@@ -184,12 +260,12 @@ const RouletteGame = () => {
                 position: 'fixed',
                 top: 100,
                 left: 0,
-                width: '30%',
+                width: '80%',
                 zIndex: 1000
               }}
             />
             <motion.img
-              src="/ninel.jpg"
+              src="/money.gif"
               initial={{ x: '100%', opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: '100%', opacity: 0 }}
@@ -198,7 +274,7 @@ const RouletteGame = () => {
                 position: 'fixed',
                 top: 100,
                 right: 0,
-                width: '30%',
+                width: '80%',
                 zIndex: 1000
               }}
             />
@@ -283,19 +359,21 @@ const RouletteGame = () => {
         )}
       </AnimatePresence>
 
-      {history.length > 0 && (
-        <Box sx={{ mt: 6 }}>
-          <Typography variant="h6" color="#f1c40f" gutterBottom>🧾 Últimas partidas:</Typography>
-          {history.map((r, i) => (
-            <Paper key={i} sx={{ p: 2, mb: 1, backgroundColor: '#222' }}>
-              <Typography>
-                🎯 Número: {r.numeroGanador} | 🎨 Color: {r.colorGanador} | 💰 Resultado: {r.resultado} | Ganancia: ${r.montoGanado.toFixed(2)}
-              </Typography>
-            </Paper>
-          ))}
-        </Box>
-      )}
-    </Box>
+      {
+        history.length > 0 && (
+          <Box sx={{ mt: 6 }}>
+            <Typography variant="h6" color="#f1c40f" gutterBottom>🧾 Últimas partidas:</Typography>
+            {history.map((r, i) => (
+              <Paper key={i} sx={{ p: 2, mb: 1, backgroundColor: '#222' }}>
+                <Typography sx={{ color: '#ffffff' }}>
+                  🎯 Número: {r.numeroGanador} | 🎨 Color: {r.colorGanador} | 💰 Resultado: {r.resultado} | Ganancia: ${r.montoGanado.toFixed(2)}
+                </Typography>
+              </Paper>
+            ))}
+          </Box>
+        )
+      }
+    </Box >
   );
 };
 
