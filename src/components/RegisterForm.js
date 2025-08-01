@@ -6,6 +6,7 @@ import {
 } from '@mui/material';
 import { Person, Email, Lock, HowToReg, Assignment, PrivacyTip } from '@mui/icons-material';
 import { AuthContext } from '../context/AuthContext';
+import api from '../services/api';
 
 const RegisterForm = () => {
   const [formData, setFormData] = useState({
@@ -14,7 +15,7 @@ const RegisterForm = () => {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
-  const { setIsAuthenticated, setUser } = useContext(AuthContext);
+  const {login } = useContext(AuthContext);
   const navigate = useNavigate();
 
   // Estilos reutilizables
@@ -72,8 +73,12 @@ const RegisterForm = () => {
     if (!formData.email) newErrors.email = 'Email es requerido';
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = 'Email no válido';
     
-    if (!formData.password) newErrors.password = 'Contraseña es requerida';
-    else if (formData.password.length < 6) newErrors.password = 'Contraseña debe tener al menos 6 caracteres';
+    const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&.,:;#^_~\-+])[A-Za-z\d@$!%*?&.,:;#^_~\-+]{8,}$/;
+    if (!formData.password) {
+      newErrors.password = 'Contraseña es requerida';
+    } else if (!passwordPattern.test(formData.password)) {
+      newErrors.password = 'La contraseña debe tener al menos 8 caracteres, incluyendo mayúsculas, minúsculas, un número y un símbolo especial';
+    }
     
     if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Las contraseñas no coinciden';
     if (!formData.acceptTerms) newErrors.acceptTerms = 'Debes aceptar los términos y condiciones';
@@ -83,24 +88,37 @@ const RegisterForm = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateForm()) return;
+  e.preventDefault();
+  if (!validateForm()) return;
 
-    setIsSubmitting(true);
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      setRegistrationSuccess(true);
-      setTimeout(() => {
-        setIsAuthenticated(true);
-        setUser({ name: formData.name, email: formData.email, balance: 1000.0, isNewUser: true });
-        navigate('/ruleta');
-      }, 2000);
-    } catch (error) {
-      setErrors(prev => ({ ...prev, server: 'Error al registrar. Intenta nuevamente.' }));
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  setIsSubmitting(true);
+  try {
+    const payload = {
+      nombre:        formData.name,
+      email:         formData.email,
+      password:      formData.password,
+    };
+
+    await api.post('/usuario', payload);;
+    setRegistrationSuccess(true);
+
+    const { data } = await api.post('/auth/login', {
+      email: formData.email,
+      password: formData.password
+    });
+    login(data.token, data.user);
+    navigate('/ruleta');
+
+  } catch (err) {
+    console.error(err);
+    const message = err.response?.data?.message 
+      || 'Error al registrar. Intenta nuevamente.';
+    setErrors(prev => ({ ...prev, server: message }));
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
 
   const renderInput = (name, label, type = 'text', icon) => (
     <TextField

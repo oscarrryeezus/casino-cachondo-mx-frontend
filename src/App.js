@@ -4,27 +4,29 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import './styles/main.css';
-import { AuthContext } from './context/AuthContext';
+import { AuthProvider } from './context/AuthContext';
 import RouletteGame from './pages/ruleta/Roulette';
 import BlackjackGame from './pages/blackjack/blackjack';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState(null);
-
   return (
-    <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated, user, setUser }}>
+    <AuthProvider> {/* Solo un provider */}
       <Router>
         <div className="app bg-dark text-light">
           <Navbar />
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path='/ruleta' element={<RouletteGame />}/>
-            <Route path='/blackjack' element={< BlackjackGame/>}/>
+            
+            {/* Rutas protegidas correctamente anidadas */}
+            <Route element={<ProtectedRoute />}>
+              <Route path="/ruleta" element={<RouletteGame />} />
+              <Route path="/blackjack" element={<BlackjackGame />} />
+            </Route>
           </Routes>
         </div>
       </Router>
-    </AuthContext.Provider>
+    </AuthProvider>
   );
 }
 

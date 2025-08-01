@@ -1,7 +1,7 @@
 // components/Navbar.jsx
-import React, { useContext } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { AuthContext } from '../context/AuthContext';
+import React, { useContext } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 import {
   AppBar,
   Toolbar,
@@ -13,20 +13,26 @@ import {
   MenuItem,
   useMediaQuery,
   useTheme,
-} from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
+} from "@mui/material";
+import MenuIcon from "@mui/icons-material/Menu";
+import api from "../services/api";
 
 const Navbar = () => {
-  const { isAuthenticated, user, setIsAuthenticated, setUser } = useContext(AuthContext);
+  const { isAuthenticated, user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-    setUser(null);
-    navigate('/');
+  const handleLogout = async () => {
+    try {
+      await api.post("/auth/logout");
+    } catch (err) {
+      console.error("No se pudo limpiar cookie en servidor", err);
+    } finally {
+      logout();
+      navigate("/");
+    }
   };
 
   const handleMenu = (event) => {
@@ -39,23 +45,38 @@ const Navbar = () => {
 
   const renderNavLinks = () => (
     <>
-      <Button color="inherit" component={Link} to="/">Inicio</Button>
+      <Button color="inherit" component={Link} to="/">
+        Inicio
+      </Button>
       {isAuthenticated && (
         <>
-          <Button color="inherit" component={Link} to="/ruleta">Ruleta</Button>
-          <Button color="inherit" component={Link} to="/blackjack">Blackjack 21</Button>
+          <Button color="inherit" component={Link} to="/ruleta">
+            Ruleta
+          </Button>
+          <Button color="inherit" component={Link} to="/blackjack">
+            Blackjack 21
+          </Button>
         </>
       )}
     </>
   );
 
   return (
-    <AppBar position="static" sx={{ background: 'linear-gradient(to right, #000000, #111111)' }}>
+    <AppBar
+      position="static"
+      sx={{ background: "linear-gradient(to right, #000000, #111111)" }}
+    >
       <Toolbar>
         <Box
           component={Link}
           to="/"
-          sx={{ display: 'flex', alignItems: 'center', textDecoration: 'none', color: 'inherit', mr: 2 }}
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            textDecoration: "none",
+            color: "inherit",
+            mr: 2,
+          }}
         >
           <Box
             component="img"
@@ -75,26 +96,44 @@ const Navbar = () => {
               open={Boolean(anchorEl)}
               onClose={handleClose}
             >
-              <MenuItem component={Link} to="/" onClick={handleClose}>Inicio</MenuItem>
+              <MenuItem component={Link} to="/" onClick={handleClose}>
+                Inicio
+              </MenuItem>
               {isAuthenticated && (
                 <>
-                  <MenuItem component={Link} to="/ruleta" onClick={handleClose}>Ruleta</MenuItem>
-                  <MenuItem component={Link} to="/blackjack" onClick={handleClose}>Blackjack 21</MenuItem>
+                  <MenuItem component={Link} to="/ruleta" onClick={handleClose}>
+                    Ruleta
+                  </MenuItem>
+                  <MenuItem
+                    component={Link}
+                    to="/blackjack"
+                    onClick={handleClose}
+                  >
+                    Blackjack 21
+                  </MenuItem>
                 </>
               )}
               {isAuthenticated && (
-                <MenuItem onClick={() => { handleLogout(); handleClose(); }}>Cerrar Sesión</MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    handleLogout();
+                    handleClose();
+                  }}
+                >
+                  Cerrar Sesión
+                </MenuItem>
               )}
             </Menu>
           </>
         ) : (
           <>
-            <Box sx={{ flexGrow: 1 }}>
-              {renderNavLinks()}
-            </Box>
+            <Box sx={{ flexGrow: 1 }}>{renderNavLinks()}</Box>
             {isAuthenticated && (
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Typography sx={{ color: 'gold', mr: 2 }}>
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <Typography sx={{ color: "gold", mr: 2 }}>
+                  {user?.nombre || "Usuario"}
+                </Typography>
+                <Typography sx={{ color: "gold", mr: 2 }}>
                   Saldo: ${user?.balance?.toFixed(2)}
                 </Typography>
                 <Button color="error" variant="outlined" onClick={handleLogout}>

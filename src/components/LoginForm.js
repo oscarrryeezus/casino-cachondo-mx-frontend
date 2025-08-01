@@ -1,25 +1,40 @@
 import React, { useState, useContext } from 'react';
-import { TextField, Button, Typography, Box, Alert, InputAdornment } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import { TextField, Button, Typography, Box, Alert, InputAdornment,CircularProgress } from '@mui/material';
 import { Email, Lock } from '@mui/icons-material';
 import { AuthContext } from '../context/AuthContext';
+import api from '../services/api';
 
 const LoginForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const { setIsAuthenticated, setUser } = useContext(AuthContext);
+  const [loading, setLoading] = useState(false);
+  const { login } = useContext(AuthContext);
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (email && password) {
-      setIsAuthenticated(true);
-      setUser({
-        email,
-        balance: 1000.0,
-        name: 'Usuario Demo',
-      });
-    } else {
+    setError('');
+
+    if (!email || !password) {
       setError('Por favor ingresa email y contraseña');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await api.post('/auth/login', { email, password });
+      const { token, user: userData } = response.data;
+      login(token, userData);
+      navigate('/dashboard');
+    } catch (err) {
+      const msg =
+        err.response?.data?.message ||
+        'Ocurrió un error al iniciar sesión';
+      setError(msg);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -142,6 +157,8 @@ const LoginForm = () => {
         fullWidth
         variant="contained"
         size="large"
+        disabled={loading}
+        startIcon={loading ? <CircularProgress size={20} /> : null}
         sx={{
           mt: 2,
           py: 1.5,
@@ -164,7 +181,6 @@ const LoginForm = () => {
       >
         Ingresar
       </Button>
-      
       
     </Box>
   );
