@@ -1,21 +1,27 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
-  Box, Typography, Button, TextField, Alert, Grid, Paper
+  Box, Typography, Button, TextField, Alert, Grid
 } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 
-const valores = [2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 11]; // J, Q, K = 10; A = 11 o 1
-const palos = ['♠️', '♥️', '♦️', '♣️'];
+const valores = [2, 3, 4, 5, 6, 7, 8, 9, 10, 'J', 'Q', 'K', 11];
+const palos = ['\u2660\ufe0f', '\u2665\ufe0f', '\u2666\ufe0f', '\u2663\ufe0f'];
+
+const valorPuntaje = (valor) => {
+  if (valor === 'J' || valor === 'Q' || valor === 'K') return 10;
+  if (valor === 11) return 11;
+  return valor;
+};
 
 const generarCarta = () => {
   const valor = valores[Math.floor(Math.random() * valores.length)];
   const palo = palos[Math.floor(Math.random() * palos.length)];
-  return { valor, palo };
+  return { valor, palo, puntaje: valorPuntaje(valor) };
 };
 
 const calcularPuntaje = (cartas) => {
-  let total = cartas.reduce((acc, c) => acc + c.valor, 0);
+  let total = cartas.reduce((acc, c) => acc + c.puntaje, 0);
   let ases = cartas.filter(c => c.valor === 11).length;
   while (total > 21 && ases > 0) {
     total -= 10;
@@ -24,7 +30,92 @@ const calcularPuntaje = (cartas) => {
   return total;
 };
 
-const userId = '688a8deb41a491a2ebb6b0cc'; // Cambia por el usuario autenticado real
+const userId = '688a8deb41a491a2ebb6b0cc';
+
+const paloColor = (palo) => {
+  // Corazones y diamantes en rojo, picas y tréboles en negro
+  return palo === '\u2665' || palo === '\u2666' ? '#e60000' : '#000000';
+};
+
+const Carta = ({ valor, palo }) => {
+  const textoValor = valor === 11 ? 'A' : valor;
+  const textoFinal = valor === 'J' || valor === 'Q' || valor === 'K' ? valor : textoValor;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.3 }}
+      style={{
+        display: 'inline-block',
+        width: 80,
+        height: 120,
+        backgroundColor: 'white',
+        borderRadius: 12,
+        boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
+        margin: '0 6px',
+        position: 'relative',
+        userSelect: 'none',
+        fontFamily: "'Georgia', serif",
+        border: `2px solid ${paloColor(palo)}`,
+        color: paloColor(palo),
+        cursor: 'default',
+      }}
+    >
+      {/* Valor y símbolo arriba izquierda */}
+      <Box
+        sx={{
+          position: 'absolute',
+          top: 8,
+          left: 8,
+          fontSize: 20,
+          fontWeight: 'bold',
+          lineHeight: 1,
+          userSelect: 'none',
+        }}
+      >
+        {textoFinal}
+        <br />
+        <span style={{ fontSize: 22 }}>{palo}</span>
+      </Box>
+
+      {/* Valor y símbolo abajo derecha */}
+      <Box
+        sx={{
+          position: 'absolute',
+          bottom: 8,
+          right: 8,
+          fontSize: 20,
+          fontWeight: 'bold',
+          lineHeight: 1,
+          userSelect: 'none',
+          transform: 'rotate(180deg)',
+        }}
+      >
+        {textoFinal}
+        <br />
+        <span style={{ fontSize: 22 }}>{palo}</span>
+      </Box>
+
+      {/* Símbolo grande centrado */}
+      <Box
+        sx={{
+          height: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: 50,
+          opacity: 0.15,
+          userSelect: 'none',
+          pointerEvents: 'none',
+        }}
+      >
+        {palo}
+      </Box>
+    </motion.div>
+  );
+};
 
 const BlackjackGame = () => {
   const [jugador, setJugador] = useState([]);
@@ -33,16 +124,24 @@ const BlackjackGame = () => {
   const [jugando, setJugando] = useState(false);
   const [ganador, setGanador] = useState('');
   const [apuesta, setApuesta] = useState('');
-  const [fondos, setFondos] = useState(1000); // Puedes obtenerlo del backend en useEffect
+  const [fondos, setFondos] = useState(1000);
   const [error, setError] = useState('');
   const audioWin = useRef(null);
   const audioLose = useRef(null);
 
   useEffect(() => {
-    // Aquí podrías cargar los fondos actuales del usuario desde backend si quieres
-    // Ejemplo:
     // axios.get(`/api/user/${userId}`).then(r => setFondos(r.data.fondos))
   }, []);
+
+  useEffect(() => {
+    if (ganador) {
+      const timer = setTimeout(() => {
+        setGanador(''); // Oculta las imágenes
+      }, 5000); // 5 segundos
+
+      return () => clearTimeout(timer);
+    }
+  }, [ganador]);
 
   const iniciarJuego = () => {
     setError('');
@@ -112,7 +211,6 @@ const BlackjackGame = () => {
       audioLose.current?.play();
     }
 
-    // Llamar backend para actualizar fondos
     try {
       const response = await axios.post('http://localhost:3001/api/blackjack/jugar', {
         userId,
@@ -134,127 +232,235 @@ const BlackjackGame = () => {
         21 Blackjack
       </Typography>
 
-      <Typography sx={{ textAlign: 'center', mb: 2 }}>
-        Fondos disponibles: <strong>${fondos.toFixed(2)}</strong>
-      </Typography>
-
-      <TextField
-        label="Monto a apostar"
-        type="number"
-        fullWidth
-        value={apuesta}
-        onChange={(e) => setApuesta(e.target.value)}
-        inputProps={{ min: 0, max: fondos }}
-        sx={{ mb: 3, input: { color: 'white' }, label: { color: '#aaa' } }}
-      />
-
-      <Grid container spacing={2} justifyContent="center" sx={{ mt: 1 }}>
-        <Grid item xs={12} sm={6}>
-          <Paper sx={{ p: 2, bgcolor: '#333' }}>
-            <Typography variant="h6">🧑‍💼 Jugador</Typography>
-            <Typography>Puntaje: {calcularPuntaje(jugador)}</Typography>
-            <Box sx={{ mt: 1 }}>
-              {jugador.map((c, i) => (
-                <span key={i}>{c.valor}{c.palo} </span>
-              ))}
-            </Box>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <Paper sx={{ p: 2, bgcolor: '#333' }}>
-            <Typography variant="h6">🎲 Crupier</Typography>
-            <Typography>Puntaje: {jugando ? '?' : calcularPuntaje(crupier)}</Typography>
-            <Box sx={{ mt: 1 }}>
-              {crupier.map((c, i) => (
-                <span key={i}>{c.valor}{c.palo} </span>
-              ))}
-            </Box>
-          </Paper>
-        </Grid>
-      </Grid>
-
-      <Box sx={{ mt: 4, textAlign: 'center' }}>
-        {!jugando ? (
-          <Button variant="contained" color="primary" onClick={iniciarJuego}>
-            Comenzar Juego
-          </Button>
-        ) : (
-          <>
-            <Button variant="contained" color="success" onClick={pedirCarta} sx={{ mx: 1 }}>
-              Pedir Carta
-            </Button>
-            <Button variant="contained" color="warning" onClick={plantarse} sx={{ mx: 1 }}>
-              Plantarse
-            </Button>
-          </>
+      <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+        {mensaje && (
+          <Alert
+            severity={
+              ganador === 'ganado'
+                ? 'success'
+                : ganador === 'perdido'
+                ? 'error'
+                : ganador === 'error'
+                ? 'warning'
+                : 'info'
+            }
+            sx={{ width: '100%', maxWidth: 500 }}
+          >
+            {mensaje}
+          </Alert>
         )}
       </Box>
 
-      {error && (
-        <Box sx={{ mt: 3 }}>
-          <Alert severity="error">{error}</Alert>
-        </Box>
-      )}
+<Typography variant="h6" align="center" sx={{ mt: 1 }}>
+  Fondos: ${fondos}
+</Typography>
 
-      {mensaje && (
-        <Box sx={{ mt: 3 }}>
-          <Alert severity={ganador === 'ganado' ? 'success' : ganador === 'perdido' ? 'error' : 'info'}>
-            {mensaje}
-          </Alert>
-        </Box>
-      )}
+{/* Cartas de ejemplo al inicio */}
+{!jugando && jugador.length === 0 && (
+  <Box
+    sx={{
+      display: 'flex',
+      justifyContent: 'center',
+      mt: 2,
+      mb: 3,
+    }}
+  >
+    {[{ valor: 10, palo: '\u2665\ufe0f' }, { valor: 'J', palo: '\u2663\ufe0f' }].map((c, i) => (
+      <Carta key={i} valor={c.valor} palo={c.palo} />
+    ))}
+  </Box>
+)}
+{/* Zona cartas con crupier arriba - solo se muestra si se está jugando o hay cartas */}
+{/* Zona cartas con crupier arriba - solo se muestra si se está jugando o hay cartas */}
+{(jugando || jugador.length > 0) && (
+  <Box sx={{ position: 'relative', width: '100%', maxWidth: 700, margin: '0 auto', height: 360 }}>
+    {/* Etiqueta Crupier */}
+    <Typography
+      sx={{
+        position: 'absolute',
+        top: 0,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        color: '#4da6ff',
+        fontWeight: 'bold',
+        zIndex: 3,
+        userSelect: 'none',
+      }}
+    >
+      Crupier
+    </Typography>
 
+    {/* Cartas Crupier */}
+    <Box sx={{
+      position: 'absolute',
+      top: 30,
+      left: '50%',
+      transform: 'translateX(-50%)',
+      display: 'flex',
+      justifyContent: 'center',
+      zIndex: 2,
+    }}>
       <AnimatePresence>
-        {ganador === 'ganado' && (
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1.1 }}
-            exit={{ scale: 0 }}
-            transition={{ duration: 0.5 }}
-            style={{
-              position: 'fixed',
-              top: '40%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              zIndex: 2000
-            }}
-          >
-            <Typography variant="h2" sx={{
-              fontWeight: 'bold',
-              color: '#ffd700',
-              textShadow: '0 0 20px #fff, 0 0 40px #ff0'
-            }}>
-              ¡Ganaste ${parseFloat(apuesta).toFixed(2)}!
-            </Typography>
-          </motion.div>
-        )}
+        {crupier.map((c, i) => (
+          <Carta key={i} valor={c.valor} palo={c.palo} />
+        ))}
       </AnimatePresence>
+    </Box>
 
+    {/* Contador de puntos del crupier (debajo de sus cartas) */}
+    {crupier.length > 0 && (
+      <Typography
+        variant="h6"
+        sx={{
+          position: 'absolute',
+          top: 160,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          color: '#4da6ff',
+          fontWeight: 'bold',
+          zIndex: 3
+        }}
+      >
+        Puntos: {calcularPuntaje(crupier)}
+      </Typography>
+    )}
+
+    {/* Etiqueta Jugador */}
+    <Typography
+      sx={{
+        position: 'absolute',
+        bottom: 130,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        fontWeight: 'bold',
+        userSelect: 'none',
+        color: 'white',
+        zIndex: 3,
+      }}
+    >
+      Jugador
+    </Typography>
+
+    {/* Cartas Jugador */}
+    <Box sx={{
+      position: 'absolute',
+      bottom: 10,
+      left: '50%',
+      transform: 'translateX(-50%)',
+      display: 'flex',
+      justifyContent: 'center',
+      zIndex: 1,
+    }}>
       <AnimatePresence>
-        {ganador === 'perdido' && (
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1.1 }}
-            exit={{ scale: 0 }}
-            transition={{ duration: 0.5 }}
-            style={{
-              position: 'fixed',
-              top: '40%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              zIndex: 2000
-            }}
-          >
-            <Typography variant="h2" sx={{
-              fontWeight: 'bold',
-              color: '#ff0000',
-              textShadow: '0 0 20px #fff, 0 0 40px #f00'
-            }}>
-              ¡Perdiste ${parseFloat(apuesta).toFixed(2)}!
-            </Typography>
-          </motion.div>
-        )}
+        {jugador.map((c, i) => (
+          <Carta key={i} valor={c.valor} palo={c.palo} />
+        ))}
       </AnimatePresence>
+    </Box>
+
+    {/* Contador de puntos del jugador */}
+    {jugador.length > 0 && (
+      <Typography
+        variant="h6"
+        sx={{
+          position: 'absolute',
+          bottom: -20,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          color: '#00e676',
+          fontWeight: 'bold',
+          zIndex: 3
+        }}
+      >
+        Puntos: {calcularPuntaje(jugador)}
+      </Typography>
+    )}
+  </Box>
+)}
+
+      <Box sx={{ mt: 4, textAlign: 'center' }}>
+        <Grid container spacing={2} justifyContent="center" alignItems="center">
+          <Grid item>
+            <TextField
+              type="number"
+              variant="outlined"
+              size="small"
+              value={apuesta}
+              onChange={(e) => setApuesta(Number(e.target.value))}
+              label="Apuesta"
+              InputProps={{ inputProps: { min: 0 }, sx: { color: 'white' } }}
+              InputLabelProps={{ sx: { color: 'white' } }}
+              sx={{ width: 120 }}
+            />
+          </Grid>
+          <Grid item>
+            <Button variant="contained" color="primary" onClick={iniciarJuego}>
+              Apostar
+            </Button>
+          </Grid>
+        </Grid>
+
+        <Box sx={{ mt: 4, textAlign: 'center' }}>
+          {!jugando ? (
+            <Button variant="contained" color="primary" onClick={iniciarJuego}>
+              Comenzar Juego
+            </Button>
+          ) : (
+            <>
+              <Button variant="contained" color="success" onClick={pedirCarta} sx={{ mx: 1 }}>
+                Pedir Carta
+              </Button>
+              <Button variant="contained" color="warning" onClick={plantarse} sx={{ mx: 1 }}>
+                Plantarse
+              </Button>
+            </>
+          )}
+        </Box>
+
+        <AnimatePresence>
+          {ganador === 'ganado' && (
+            <>
+              <motion.img
+                src="/money.gif"
+                initial={{ x: '-100%', opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: '-100%', opacity: 0 }}
+                transition={{ duration: 1 }}
+                style={{ position: 'fixed', top: 100, left: 0, width: '80%', zIndex: 1000, pointerEvents: 'none' }}
+              />
+              <motion.img
+                src="/money.gif"
+                initial={{ x: '100%', opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: '100%', opacity: 0 }}
+                transition={{ duration: 1 }}
+                style={{ position: 'fixed', top: 100, right: 0, width: '80%', zIndex: 1000, pointerEvents: 'none' }}
+              />
+            </>
+          )}
+
+          {ganador === 'perdido' && (
+            <>
+              <motion.img
+                src="/lose.jpg"
+                initial={{ x: '-100%', opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: '-100%', opacity: 0 }}
+                transition={{ duration: 1 }}
+                style={{ position: 'fixed', top: 100, left: 0, width: '30%', zIndex: 1000, pointerEvents: 'none' }}
+              />
+              <motion.img
+                src="/lose.jpg"
+                initial={{ x: '100%', opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: '100%', opacity: 0 }}
+                transition={{ duration: 1 }}
+                style={{ position: 'fixed', top: 100, right: 0, width: '30%', zIndex: 1000, pointerEvents: 'none' }}
+              />
+            </>
+          )}
+        </AnimatePresence>
+      </Box>
     </Box>
   );
 };
