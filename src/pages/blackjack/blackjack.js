@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext'; // ajusta la ruta si es diferente
+
 import {
   Box, Typography, Button, TextField, Alert, Grid
 } from '@mui/material';
@@ -30,7 +32,6 @@ const calcularPuntaje = (cartas) => {
   return total;
 };
 
-const userId = '688a8deb41a491a2ebb6b0cc';
 
 const paloColor = (palo) => {
   // Corazones y diamantes en rojo, picas y tréboles en negro
@@ -118,6 +119,7 @@ const Carta = ({ valor, palo }) => {
 };
 
 const BlackjackGame = () => {
+  const { user } = useAuth();
   const [jugador, setJugador] = useState([]);
   const [crupier, setCrupier] = useState([]);
   const [mensaje, setMensaje] = useState('');
@@ -129,9 +131,21 @@ const BlackjackGame = () => {
   const audioWin = useRef(null);
   const audioLose = useRef(null);
 
-  useEffect(() => {
-    // axios.get(`/api/user/${userId}`).then(r => setFondos(r.data.fondos))
-  }, []);
+useEffect(() => {
+  const obtenerFondos = async () => {
+    try {
+      const response = await axios.get(`http://localhost:3001/api/usuarios/${user.id}/fondos`);
+      setFondos(response.data.fondos);
+    } catch (err) {
+      console.error("Error al obtener fondos:", err);
+      setError("No se pudieron obtener los fondos del usuario.");
+    }
+  };
+
+  if (user?.id) {
+    obtenerFondos();
+  }
+}, [user]);
 
   useEffect(() => {
     if (ganador) {
@@ -213,7 +227,7 @@ const BlackjackGame = () => {
 
     try {
       const response = await axios.post('http://localhost:3001/api/blackjack/jugar', {
-        userId,
+        userId: user.id, 
         resultado,
         apuesta: parseFloat(apuesta)
       });
