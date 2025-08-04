@@ -133,8 +133,8 @@ const Navbar = () => {
                 <Typography sx={{ color: "gold", mr: 2 }}>
                   {user?.nombre || "Usuario"}
                 </Typography>
-                <Typography sx={{ color: "gold", mr: 2 }}>
-                  Saldo: ${user?.balance?.toFixed(2)}
+                <Typography sx={{ color: "gold", mr: 2 }} component={Link} to="/saldo">
+                  Saldo: ${user?.fondos?.toFixed(2)}
                 </Typography>
                 <Button color="error" variant="outlined" onClick={handleLogout}>
                   Cerrar Sesión

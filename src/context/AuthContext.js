@@ -46,6 +46,10 @@ export const AuthProvider = ({ children }) => {
     setIsAuthenticated(false);
     setUser(null);
   };
+  
+   const updateBalance = (newBalance) => {
+    setUser(prev => ({ ...prev, fondos: newBalance }));
+  };
 
   return (
     <AuthContext.Provider
@@ -53,6 +57,7 @@ export const AuthProvider = ({ children }) => {
         isAuthenticated,
         user,
         checkingSession,
+        updateBalance,
         login,
         logout,
       }}
