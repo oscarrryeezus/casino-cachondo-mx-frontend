@@ -134,7 +134,7 @@ const Navbar = () => {
                   {user?.nombre || "Usuario"}
                 </Typography>
                 <Typography sx={{ color: "gold", mr: 2 }}>
-                  Saldo: ${user?.balance?.toFixed(2)}
+                  Saldo: ${user?.fondos?.toFixed(2)}
                 </Typography>
                 <Button color="error" variant="outlined" onClick={handleLogout}>
                   Cerrar Sesión

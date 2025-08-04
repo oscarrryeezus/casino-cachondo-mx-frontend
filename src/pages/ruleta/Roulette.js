@@ -4,6 +4,7 @@ import {
 } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
+import { useAuth } from '../../context/AuthContext';
 
 const colors = ['rojo', 'negro', 'verde'];
 
@@ -21,6 +22,8 @@ const RouletteGame = () => {
   const audioRef = useRef(null);
   const audioPerder = useRef(null);
 
+  const { user, checkingSession } = useAuth();
+
   const validateInputs = () => {
     if (!apuesta || isNaN(apuesta) || parseFloat(apuesta) <= 0) {
       return 'Ingresa un monto válido mayor a 0';
@@ -35,6 +38,18 @@ const RouletteGame = () => {
   };
 
   const playRoulette = async () => {
+
+    if (checkingSession) {
+      setError('Validando sesión...');
+      return;
+    }
+
+    if (!user || !user._id) {
+      setError('Usuario no autenticado');
+      return;
+    }
+
+
     setError('');
     const validationError = validateInputs();
     if (validationError) {
@@ -48,7 +63,7 @@ const RouletteGame = () => {
 
     try {
       const response = await axios.post("http://localhost:3001/api/roulette/play", {
-        userId: '687fd1becbba192ec6382294',
+        userId: user?._id,
         apuesta,
         color,
         numero
@@ -89,6 +104,10 @@ const RouletteGame = () => {
 
 
   };
+
+  if (checkingSession) {
+    return <Typography color="white" align="center">Cargando sesión...</Typography>;
+  }
 
   return (
     <Box sx={{ position: 'relative', minHeight: '100vh', backgroundColor: '#111', color: '#fff', p: 4 }}>
