@@ -3,8 +3,8 @@ import {
   Box, Typography, Button, TextField, MenuItem, Alert, Grid, Paper
 } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
-import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
+import api from '../../services/api';
 
 const colors = ['rojo', 'negro', 'verde'];
 
@@ -20,7 +20,7 @@ const RouletteGame = () => {
   const [history, setHistory] = useState([]);
   const [,] = useState();
   const audioRef = useRef(null);
-  const { user, checkingSession } = useAuth();
+  const { user, checkingSession, updateBalance } = useAuth();
 
   const audioPerder = useRef(null);
 
@@ -55,7 +55,7 @@ const RouletteGame = () => {
     setShowWinAnimation(false);
 
     try {
-      const response = await axios.post("http://localhost:3001/api/roulette/play", {
+      const response = await api.post("/roulette/play", {
         userId: user?._id,
         apuesta,
         color,
@@ -65,6 +65,8 @@ const RouletteGame = () => {
       const data = await response.data
 
       const { numeroGanador, colorGanador, resultado, montoGanado, fondosActuales } = data
+
+      updateBalance(fondosActuales);
 
       setTimeout(() => {
         const resultData = {
