@@ -1,11 +1,11 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useAuth } from '../../context/AuthContext'; // ajusta la ruta si es diferente
+import React, { useState, useRef, useEffect, useContext } from 'react';
+import { AuthContext } from "../../context/AuthContext";
+import api from '../../services/api';
 
 import {
   Box, Typography, Button, TextField, Alert, Grid
 } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
-import axios from 'axios';
 
 const valores = [2, 3, 4, 5, 6, 7, 8, 9, 10, 'J', 'Q', 'K', 11];
 const palos = ['\u2660\ufe0f', '\u2665\ufe0f', '\u2666\ufe0f', '\u2663\ufe0f'];
@@ -119,7 +119,6 @@ const Carta = ({ valor, palo }) => {
 };
 
 const BlackjackGame = () => {
-  const { user, checkingSession } = useAuth();
   const [jugador, setJugador] = useState([]);
   const [crupier, setCrupier] = useState([]);
   const [mensaje, setMensaje] = useState('');
@@ -130,11 +129,12 @@ const BlackjackGame = () => {
   const [error, setError] = useState('');
   const audioWin = useRef(null);
   const audioLose = useRef(null);
+  const { user, updateBalance} = useContext(AuthContext);
 
 useEffect(() => {
   const obtenerFondos = async () => {
     try {
-      const response = await axios.get(`http://localhost:3001/api/usuarios/${user.id}/fondos`);
+      const response = await api.get(`/usuarios/${user.id}/fondos`);
       setFondos(response.data.fondos);
     } catch (err) {
       console.error("Error al obtener fondos:", err);
@@ -226,12 +226,13 @@ useEffect(() => {
     }
 
     try {
-      const response = await axios.post('http://localhost:3001/api/blackjack/jugar', {
-        userId: user.id, 
+      const response = await api.post('/blackjack/jugar', {
+        userId: user._id, 
         resultado,
         apuesta: parseFloat(apuesta)
       });
       setFondos(response.data.fondos);
+      updateBalance(response.data.fondos);
     } catch (error) {
       setError('Error al actualizar fondos: ' + (error.response?.data?.message || error.message));
     }
