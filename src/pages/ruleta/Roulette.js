@@ -4,6 +4,7 @@ import {
 } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
+import { useAuth } from '../../context/AuthContext';
 
 const colors = ['rojo', 'negro', 'verde'];
 
@@ -19,6 +20,8 @@ const RouletteGame = () => {
   const [history, setHistory] = useState([]);
   const [,] = useState();
   const audioRef = useRef(null);
+  const { user, checkingSession } = useAuth();
+
   const audioPerder = useRef(null);
 
   const validateInputs = () => {
@@ -36,6 +39,11 @@ const RouletteGame = () => {
 
   const playRoulette = async () => {
     setError('');
+    if (checkingSession) {
+      setError('Validando sesión...');
+      return;
+    }
+
     const validationError = validateInputs();
     if (validationError) {
       setError(validationError);
@@ -48,7 +56,7 @@ const RouletteGame = () => {
 
     try {
       const response = await axios.post("http://localhost:3001/api/roulette/play", {
-        userId: '687fd1becbba192ec6382294',
+        userId: user?._id,
         apuesta,
         color,
         numero
@@ -89,6 +97,10 @@ const RouletteGame = () => {
 
 
   };
+
+  if (checkingSession) {
+    return <Typography color="white" align="center">Cargando sesión...</Typography>;
+  }
 
   return (
     <Box sx={{ position: 'relative', minHeight: '100vh', backgroundColor: '#111', color: '#fff', p: 4 }}>

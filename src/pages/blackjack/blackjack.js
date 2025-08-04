@@ -119,7 +119,7 @@ const Carta = ({ valor, palo }) => {
 };
 
 const BlackjackGame = () => {
-  const { user } = useAuth();
+  const { user, checkingSession } = useAuth();
   const [jugador, setJugador] = useState([]);
   const [crupier, setCrupier] = useState([]);
   const [mensaje, setMensaje] = useState('');
@@ -266,7 +266,7 @@ useEffect(() => {
       </Box>
 
 <Typography variant="h6" align="center" sx={{ mt: 1 }}>
-  Fondos: ${fondos}
+  Fondos: ${user.fondos}
 </Typography>
 
 {/* Cartas de ejemplo al inicio */}
