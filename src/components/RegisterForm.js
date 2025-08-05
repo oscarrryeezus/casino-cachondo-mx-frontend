@@ -97,9 +97,11 @@ const RegisterForm = () => {
       nombre:        formData.name,
       email:         formData.email,
       password:      formData.password,
+
     };
 
-    await api.post('/usuario/', payload);;
+   const datos = await api.post('/usuario', payload);
+    console.log(datos)
     setRegistrationSuccess(true);
 
     const { data } = await api.post('/auth/login', {
