@@ -1,25 +1,23 @@
-# frontend/Dockerfile
+# Etapa 1: build
 FROM node:18-alpine as build
 
 WORKDIR /app
 
 COPY package*.json ./
-
 RUN npm install
 
 COPY . .
-
-# Construir la app para producción
 RUN npm run build
 
-# Servir la app con un servidor estático (por ejemplo, nginx)
+# Etapa 2: servidor nginx
 FROM nginx:stable-alpine
 
-# Copiar build a la carpeta de nginx
+# Copiar la build al directorio que sirve Nginx
 COPY --from=build /app/build /usr/share/nginx/html
 
-# Exponer el puerto 80
-EXPOSE 80
+# Cambiar el puerto de Nginx a 3000
+RUN sed -i 's/80/3000/g' /etc/nginx/conf.d/default.conf
 
-# Iniciar nginx
+EXPOSE 3000
+
 CMD ["nginx", "-g", "daemon off;"]

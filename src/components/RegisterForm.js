@@ -1,8 +1,8 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Box, TextField, Checkbox, FormControlLabel, Typography, 
-  Alert, Button, CircularProgress, Link, InputAdornment 
+import {
+  Box, TextField, Checkbox, FormControlLabel, Typography,
+  Alert, Button, CircularProgress, Link, InputAdornment
 } from '@mui/material';
 import { Person, Email, Lock, HowToReg, Assignment, PrivacyTip } from '@mui/icons-material';
 import { AuthContext } from '../context/AuthContext';
@@ -15,7 +15,7 @@ const RegisterForm = () => {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
-  const {login } = useContext(AuthContext);
+  const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
   // Estilos reutilizables
@@ -69,55 +69,56 @@ const RegisterForm = () => {
     const newErrors = {};
     if (!formData.name.trim()) newErrors.name = 'Nombre completo es requerido';
     else if (formData.name.length < 3) newErrors.name = 'Nombre debe tener al menos 3 caracteres';
-    
+
     if (!formData.email) newErrors.email = 'Email es requerido';
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = 'Email no válido';
-    
+
     const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&.,:;#^_~\-+])[A-Za-z\d@$!%*?&.,:;#^_~\-+]{8,}$/;
     if (!formData.password) {
       newErrors.password = 'Contraseña es requerida';
     } else if (!passwordPattern.test(formData.password)) {
       newErrors.password = 'La contraseña debe tener al menos 8 caracteres, incluyendo mayúsculas, minúsculas, un número y un símbolo especial';
     }
-    
+
     if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Las contraseñas no coinciden';
     if (!formData.acceptTerms) newErrors.acceptTerms = 'Debes aceptar los términos y condiciones';
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (!validateForm()) return;
+    e.preventDefault();
+    if (!validateForm()) return;
 
-  setIsSubmitting(true);
-  try {
-    const payload = {
-      nombre:        formData.name,
-      email:         formData.email,
-      password:      formData.password,
-    };
+    setIsSubmitting(true);
+    try {
+      const payload = {
+        nombre: formData.name,
+        email: formData.email,
+        password: formData.password,
+      };
 
-    await api.post('/usuario', payload);;
-    setRegistrationSuccess(true);
+      const response = await api.post('/usuario', payload);;
+      console.log(response)
+      setRegistrationSuccess(true);
 
-    const { data } = await api.post('/auth/login', {
-      email: formData.email,
-      password: formData.password
-    });
-    login(data.token, data.user);
-    navigate('/ruleta');
+      const { data } = await api.post('/auth/login', {
+        email: formData.email,
+        password: formData.password
+      });
+      login(data.token, data.user);
+      navigate('/ruleta');
 
-  } catch (err) {
-    console.error(err);
-    const message = err.response?.data?.message 
-      || 'Error al registrar. Intenta nuevamente.';
-    setErrors(prev => ({ ...prev, server: message }));
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+    } catch (err) {
+      console.error(err);
+      const message = err.response?.data?.message
+        || 'Error al registrar. Intenta nuevamente.';
+      setErrors(prev => ({ ...prev, server: message }));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
 
   const renderInput = (name, label, type = 'text', icon) => (
@@ -169,7 +170,7 @@ const RegisterForm = () => {
             name="acceptTerms"
             checked={formData.acceptTerms}
             onChange={handleChange}
-            sx={{ 
+            sx={{
               color: errors.acceptTerms ? 'error.main' : '#FFD700',
               '&.Mui-checked': { color: '#FFA500' },
             }}
@@ -211,7 +212,7 @@ const RegisterForm = () => {
 
       <Typography variant="caption" align="center" sx={{ color: '#ccc', mt: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
         <svg height="16" width="16" viewBox="0 0 24 24" fill="#FFD700">
-          <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-1 6h2v2h-2V7zm0 4h2v6h-2v-6z"/>
+          <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-1 6h2v2h-2V7zm0 4h2v6h-2v-6z" />
         </svg>
         Al registrarte, confirmas que eres mayor de 18 años.
       </Typography>

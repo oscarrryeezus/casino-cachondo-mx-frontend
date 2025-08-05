@@ -10,6 +10,8 @@ import { getUser } from '../../services/auth';
 const valores = [2, 3, 4, 5, 6, 7, 8, 9, 10, 'J', 'Q', 'K', 11];
 const palos = ['\u2660\ufe0f', '\u2665\ufe0f', '\u2666\ufe0f', '\u2663\ufe0f'];
 
+const REACT_APP_BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+
 const valorPuntaje = (valor) => {
   if (valor === 'J' || valor === 'Q' || valor === 'K') return 10;
   if (valor === 11) return 11;
@@ -142,7 +144,7 @@ const BlackjackGame = () => {
   useEffect(() => {
     const obtenerFondos = async () => {
       try {
-        const response = await axios.get(`http://localhost:3001/api/usuarios/${user.id}/fondos`);
+        const response = await axios.get(`${REACT_APP_BACKEND_URL}/usuarios/${user.id}/fondos`);
         setFondos(response.data.fondos);
       } catch (err) {
         console.error("Error al obtener fondos:", err);
@@ -234,7 +236,7 @@ const BlackjackGame = () => {
     }
 
     try {
-      const response = await axios.post('http://localhost:3001/api/blackjack/jugar', {
+      const response = await axios.post(`${REACT_APP_BACKEND_URL}/blackjack/jugar`, {
         userId: user.id,
         resultado,
         apuesta: parseFloat(apuesta)
@@ -244,8 +246,6 @@ const BlackjackGame = () => {
       setError('Error al actualizar fondos: ' + (error.response?.data?.message || error.message));
     }
   };
-
-  if (!user) return <Typography>Cargando usuario...</Typography>;
 
   return (
     <Box sx={{ p: 4, bgcolor: '#1c1c1c', minHeight: '100vh', color: 'white' }}>

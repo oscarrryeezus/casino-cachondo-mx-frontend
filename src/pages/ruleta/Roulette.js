@@ -7,6 +7,7 @@ import axios from 'axios';
 import { getUser } from '../../services/auth';
 
 const colors = ['rojo', 'negro', 'verde'];
+const REACT_APP_BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 const RouletteGame = () => {
   const [user, setUser] = useState(null);
@@ -52,19 +53,14 @@ const RouletteGame = () => {
       return;
     }
 
-    if (!user) {
-      setError("Usuario no autenticado.");
-      return;
-    }
-
     setSpinning(true);
     setResult(null);
     setShowWinAnimation(false);
     setShowLoseAnimation(false);
 
     try {
-      const response = await axios.post("http://localhost:3001/api/roulette/play", {
-        userId: user._id,
+      const response = await axios.post(`${REACT_APP_BACKEND_URL}/roulette/play`, {
+        userId: user.id,
         apuesta,
         color,
         numero
@@ -99,13 +95,10 @@ const RouletteGame = () => {
       }, 3000);
     } catch (e) {
       setError(e?.response?.data?.error || 'Error al jugar ruleta.');
+      console.log(e)
       setSpinning(false);
     }
   };
-
-  if (!user) {
-    return <Typography color="white" align="center">Cargando usuario...</Typography>;
-  }
 
   return (
     <Box sx={{ position: 'relative', minHeight: '100vh', backgroundColor: '#111', color: '#fff', p: 4 }}>

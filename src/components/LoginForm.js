@@ -30,6 +30,7 @@ const LoginForm = () => {
       login(token, userData);
       saveUser(userData)
       saveToken(token)
+      console.log(userData)
       navigate('/dashboard');
     } catch (err) {
       const msg =
