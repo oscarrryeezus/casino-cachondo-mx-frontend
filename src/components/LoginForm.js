@@ -27,7 +27,9 @@ const LoginForm = () => {
       const response = await api.post('/auth/login', { email, password });
       const { token, user: userData } = response.data;
       login(token, userData);
+     
       navigate('/dashboard');
+
     } catch (err) {
       const msg =
         err.response?.data?.message ||

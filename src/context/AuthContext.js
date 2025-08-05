@@ -8,32 +8,38 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [checkingSession, setCheckingSession] = useState(true);
 
-  useEffect(() => {
-    const checkSession = async () => {
-      try {
-        api.interceptors.request.use((config) => {
-          const token = localStorage.getItem("token");
-          if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
-          }
-          return config;
-        });
+useEffect(() => {
+  const checkSession = async () => {
+    const token = localStorage.getItem("token");
+    if (!token || isAuthenticated) {
+      setCheckingSession(false);
+      return;
+    }
 
-        const { data } = await api.get("/auth/validation");
-        setUser(data.user);
-        setIsAuthenticated(true);
-      } catch (err) {
-        console.error("Error de autenticación:", err);
-        localStorage.removeItem("token");
-        setUser(null);
-        setIsAuthenticated(false);
-      } finally {
-        setCheckingSession(false);
-      }
-    };
+    try {
+      api.interceptors.request.use((config) => {
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+      });
 
-    checkSession();
-  }, []);
+      const { data } = await api.get("/auth/validation");
+      setUser(data.user);
+      setIsAuthenticated(true);
+    } catch (err) {
+      console.error("Error de autenticación:", err);
+      localStorage.removeItem("token");
+      setUser(null);
+      setIsAuthenticated(false);
+    } finally {
+      setCheckingSession(false);
+    }
+  };
+
+  checkSession();
+}, [isAuthenticated]);
+
 
   const login = (token, userData) => {
     localStorage.setItem("token", token);
