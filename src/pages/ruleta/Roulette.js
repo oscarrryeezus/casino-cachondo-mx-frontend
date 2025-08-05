@@ -100,6 +100,10 @@ const RouletteGame = () => {
     }
   };
 
+  if(!user){
+    return <Typography>Cargando usuario</Typography>
+  }
+
   return (
     <Box sx={{ position: 'relative', minHeight: '100vh', backgroundColor: '#111', color: '#fff', p: 4 }}>
       <audio ref={audioRef} src="/quepasa.mp3" preload="auto" />
