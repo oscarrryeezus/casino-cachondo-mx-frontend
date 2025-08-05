@@ -99,13 +99,14 @@ const RegisterForm = () => {
       password:      formData.password,
     };
 
-    await api.post('/usuario', payload);;
+    await api.post('/usuario/', payload);;
     setRegistrationSuccess(true);
 
     const { data } = await api.post('/auth/login', {
       email: formData.email,
       password: formData.password
     });
+    console.log(data)
     login(data.token, data.user);
     navigate('/ruleta');
 
