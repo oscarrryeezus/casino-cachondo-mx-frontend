@@ -4,6 +4,7 @@ import { TextField, Button, Typography, Box, Alert, InputAdornment,CircularProgr
 import { Email, Lock } from '@mui/icons-material';
 import { AuthContext } from '../context/AuthContext';
 import api from '../services/api';
+import { saveToken, saveUser } from '../services/auth';
 
 const LoginForm = () => {
   const [email, setEmail] = useState('');
@@ -27,6 +28,8 @@ const LoginForm = () => {
       const response = await api.post('/auth/login', { email, password });
       const { token, user: userData } = response.data;
       login(token, userData);
+      saveUser(userData)
+      saveToken(token)
       navigate('/dashboard');
     } catch (err) {
       const msg =

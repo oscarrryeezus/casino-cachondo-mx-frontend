@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useAuth } from '../../context/AuthContext'; // ajusta la ruta si es diferente
 
 import {
   Box, Typography, Button, TextField, Alert, Grid
 } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
+import { getUser } from '../../services/auth';
 
 const valores = [2, 3, 4, 5, 6, 7, 8, 9, 10, 'J', 'Q', 'K', 11];
 const palos = ['\u2660\ufe0f', '\u2665\ufe0f', '\u2666\ufe0f', '\u2663\ufe0f'];
@@ -119,7 +119,6 @@ const Carta = ({ valor, palo }) => {
 };
 
 const BlackjackGame = () => {
-  const { user, checkingSession } = useAuth();
   const [jugador, setJugador] = useState([]);
   const [crupier, setCrupier] = useState([]);
   const [mensaje, setMensaje] = useState('');
@@ -130,22 +129,31 @@ const BlackjackGame = () => {
   const [error, setError] = useState('');
   const audioWin = useRef(null);
   const audioLose = useRef(null);
+  const [user, setUser] = useState(null);
 
-useEffect(() => {
-  const obtenerFondos = async () => {
-    try {
-      const response = await axios.get(`http://localhost:3001/api/usuarios/${user.id}/fondos`);
-      setFondos(response.data.fondos);
-    } catch (err) {
-      console.error("Error al obtener fondos:", err);
-      setError("No se pudieron obtener los fondos del usuario.");
+  useEffect(() => {
+    const usuarioGuardado = getUser();
+    if (usuarioGuardado) {
+      setUser(usuarioGuardado);
     }
-  };
+  }, []);
 
-  if (user?.id) {
-    obtenerFondos();
-  }
-}, [user]);
+
+  useEffect(() => {
+    const obtenerFondos = async () => {
+      try {
+        const response = await axios.get(`http://localhost:3001/api/usuarios/${user.id}/fondos`);
+        setFondos(response.data.fondos);
+      } catch (err) {
+        console.error("Error al obtener fondos:", err);
+        setError("No se pudieron obtener los fondos del usuario.");
+      }
+    };
+
+    if (user?.id) {
+      obtenerFondos();
+    }
+  }, [user]);
 
   useEffect(() => {
     if (ganador) {
@@ -227,7 +235,7 @@ useEffect(() => {
 
     try {
       const response = await axios.post('http://localhost:3001/api/blackjack/jugar', {
-        userId: user.id, 
+        userId: user.id,
         resultado,
         apuesta: parseFloat(apuesta)
       });
@@ -236,6 +244,8 @@ useEffect(() => {
       setError('Error al actualizar fondos: ' + (error.response?.data?.message || error.message));
     }
   };
+
+  if (!user) return <Typography>Cargando usuario...</Typography>;
 
   return (
     <Box sx={{ p: 4, bgcolor: '#1c1c1c', minHeight: '100vh', color: 'white' }}>
@@ -253,10 +263,10 @@ useEffect(() => {
               ganador === 'ganado'
                 ? 'success'
                 : ganador === 'perdido'
-                ? 'error'
-                : ganador === 'error'
-                ? 'warning'
-                : 'info'
+                  ? 'error'
+                  : ganador === 'error'
+                    ? 'warning'
+                    : 'info'
             }
             sx={{ width: '100%', maxWidth: 500 }}
           >
@@ -265,132 +275,132 @@ useEffect(() => {
         )}
       </Box>
 
-<Typography variant="h6" align="center" sx={{ mt: 1 }}>
-  Fondos: ${user.fondos}
-</Typography>
-
-{/* Cartas de ejemplo al inicio */}
-{!jugando && jugador.length === 0 && (
-  <Box
-    sx={{
-      display: 'flex',
-      justifyContent: 'center',
-      mt: 2,
-      mb: 3,
-    }}
-  >
-    {[{ valor: 10, palo: '\u2665\ufe0f' }, { valor: 'J', palo: '\u2663\ufe0f' }].map((c, i) => (
-      <Carta key={i} valor={c.valor} palo={c.palo} />
-    ))}
-  </Box>
-)}
-{/* Zona cartas con crupier arriba - solo se muestra si se está jugando o hay cartas */}
-{/* Zona cartas con crupier arriba - solo se muestra si se está jugando o hay cartas */}
-{(jugando || jugador.length > 0) && (
-  <Box sx={{ position: 'relative', width: '100%', maxWidth: 700, margin: '0 auto', height: 360 }}>
-    {/* Etiqueta Crupier */}
-    <Typography
-      sx={{
-        position: 'absolute',
-        top: 0,
-        left: '50%',
-        transform: 'translateX(-50%)',
-        color: '#4da6ff',
-        fontWeight: 'bold',
-        zIndex: 3,
-        userSelect: 'none',
-      }}
-    >
-      Crupier
-    </Typography>
-
-    {/* Cartas Crupier */}
-    <Box sx={{
-      position: 'absolute',
-      top: 30,
-      left: '50%',
-      transform: 'translateX(-50%)',
-      display: 'flex',
-      justifyContent: 'center',
-      zIndex: 2,
-    }}>
-      <AnimatePresence>
-        {crupier.map((c, i) => (
-          <Carta key={i} valor={c.valor} palo={c.palo} />
-        ))}
-      </AnimatePresence>
-    </Box>
-
-    {/* Contador de puntos del crupier (debajo de sus cartas) */}
-    {crupier.length > 0 && (
-      <Typography
-        variant="h6"
-        sx={{
-          position: 'absolute',
-          top: 160,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          color: '#4da6ff',
-          fontWeight: 'bold',
-          zIndex: 3
-        }}
-      >
-        Puntos: {calcularPuntaje(crupier)}
+      <Typography variant="h6" align="center" sx={{ mt: 1 }}>
+        Fondos: ${fondos}
       </Typography>
-    )}
 
-    {/* Etiqueta Jugador */}
-    <Typography
-      sx={{
-        position: 'absolute',
-        bottom: 130,
-        left: '50%',
-        transform: 'translateX(-50%)',
-        fontWeight: 'bold',
-        userSelect: 'none',
-        color: 'white',
-        zIndex: 3,
-      }}
-    >
-      Jugador
-    </Typography>
+      {/* Cartas de ejemplo al inicio */}
+      {!jugando && jugador.length === 0 && (
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            mt: 2,
+            mb: 3,
+          }}
+        >
+          {[{ valor: 10, palo: '\u2665\ufe0f' }, { valor: 'J', palo: '\u2663\ufe0f' }].map((c, i) => (
+            <Carta key={i} valor={c.valor} palo={c.palo} />
+          ))}
+        </Box>
+      )}
+      {/* Zona cartas con crupier arriba - solo se muestra si se está jugando o hay cartas */}
+      {/* Zona cartas con crupier arriba - solo se muestra si se está jugando o hay cartas */}
+      {(jugando || jugador.length > 0) && (
+        <Box sx={{ position: 'relative', width: '100%', maxWidth: 700, margin: '0 auto', height: 360 }}>
+          {/* Etiqueta Crupier */}
+          <Typography
+            sx={{
+              position: 'absolute',
+              top: 0,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              color: '#4da6ff',
+              fontWeight: 'bold',
+              zIndex: 3,
+              userSelect: 'none',
+            }}
+          >
+            Crupier
+          </Typography>
 
-    {/* Cartas Jugador */}
-    <Box sx={{
-      position: 'absolute',
-      bottom: 10,
-      left: '50%',
-      transform: 'translateX(-50%)',
-      display: 'flex',
-      justifyContent: 'center',
-      zIndex: 1,
-    }}>
-      <AnimatePresence>
-        {jugador.map((c, i) => (
-          <Carta key={i} valor={c.valor} palo={c.palo} />
-        ))}
-      </AnimatePresence>
-    </Box>
+          {/* Cartas Crupier */}
+          <Box sx={{
+            position: 'absolute',
+            top: 30,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            display: 'flex',
+            justifyContent: 'center',
+            zIndex: 2,
+          }}>
+            <AnimatePresence>
+              {crupier.map((c, i) => (
+                <Carta key={i} valor={c.valor} palo={c.palo} />
+              ))}
+            </AnimatePresence>
+          </Box>
 
-    {/* Contador de puntos del jugador */}
-    {jugador.length > 0 && (
-      <Typography
-        variant="h6"
-        sx={{
-          position: 'absolute',
-          bottom: -20,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          color: '#00e676',
-          fontWeight: 'bold',
-          zIndex: 3
-        }}
-      >
-        Puntos: {calcularPuntaje(jugador)}
-      </Typography>
-    )}
-  </Box>
-)}
+          {/* Contador de puntos del crupier (debajo de sus cartas) */}
+          {crupier.length > 0 && (
+            <Typography
+              variant="h6"
+              sx={{
+                position: 'absolute',
+                top: 160,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                color: '#4da6ff',
+                fontWeight: 'bold',
+                zIndex: 3
+              }}
+            >
+              Puntos: {calcularPuntaje(crupier)}
+            </Typography>
+          )}
+
+          {/* Etiqueta Jugador */}
+          <Typography
+            sx={{
+              position: 'absolute',
+              bottom: 130,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              fontWeight: 'bold',
+              userSelect: 'none',
+              color: 'white',
+              zIndex: 3,
+            }}
+          >
+            Jugador
+          </Typography>
+
+          {/* Cartas Jugador */}
+          <Box sx={{
+            position: 'absolute',
+            bottom: 10,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            display: 'flex',
+            justifyContent: 'center',
+            zIndex: 1,
+          }}>
+            <AnimatePresence>
+              {jugador.map((c, i) => (
+                <Carta key={i} valor={c.valor} palo={c.palo} />
+              ))}
+            </AnimatePresence>
+          </Box>
+
+          {/* Contador de puntos del jugador */}
+          {jugador.length > 0 && (
+            <Typography
+              variant="h6"
+              sx={{
+                position: 'absolute',
+                bottom: -20,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                color: '#00e676',
+                fontWeight: 'bold',
+                zIndex: 3
+              }}
+            >
+              Puntos: {calcularPuntaje(jugador)}
+            </Typography>
+          )}
+        </Box>
+      )}
 
       <Box sx={{ mt: 4, textAlign: 'center' }}>
         <Grid container spacing={2} justifyContent="center" alignItems="center">

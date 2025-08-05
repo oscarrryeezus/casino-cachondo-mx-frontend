@@ -16,6 +16,7 @@ import {
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import api from "../services/api";
+import { logoutOscar } from "../services/auth";
 
 const Navbar = () => {
   const { isAuthenticated, user, logout } = useContext(AuthContext);
@@ -31,6 +32,7 @@ const Navbar = () => {
       console.error("No se pudo limpiar cookie en servidor", err);
     } finally {
       logout();
+      logoutOscar()
       navigate("/");
     }
   };
