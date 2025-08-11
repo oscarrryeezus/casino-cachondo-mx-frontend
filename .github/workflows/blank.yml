@@ -51,7 +51,7 @@ jobs:
       # 8. Actualizar contenedor en Azure Container Instances
       - name: Delete Azure Container Instance
         run: |
-          az container delete --resource-group tutankamon --name frontend-app
+          az container delete --resource-group tutankamon --name frontend-app --yes
 
       - name: Create Azure Container Instance
         run: |
