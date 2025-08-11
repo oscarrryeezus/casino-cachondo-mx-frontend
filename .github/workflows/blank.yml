@@ -27,7 +27,7 @@ jobs:
 
       # 4. Ejecutar tests
       - name: Run tests
-        run: npm test -- --watch=false
+        run: npm run test:vitest
 
       # 5. Autenticarse en Docker Hub
       - name: Log in to Docker Hub
