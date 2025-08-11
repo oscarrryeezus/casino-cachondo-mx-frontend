@@ -10,6 +10,7 @@ import BlackjackGame from './pages/blackjack/blackjack';
 import ProtectedRoute from './components/ProtectedRoute';
 import Saldo from './pages/saldo/Saldo';
 
+ // testeo
 function App() {
   return (
     <AuthProvider>
