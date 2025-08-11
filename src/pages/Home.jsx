@@ -89,8 +89,7 @@ const Home = () => {
         </AnimatePresence>
       </Box>
 
-      {/* Sección del Formulario */}
-      <Box sx={styles.formSection}>
+     <Box sx={styles.formSection}>
         <Box sx={styles.formContainer}>
           <AnimatePresence mode='wait'>
             <motion.div
@@ -137,14 +136,12 @@ const Home = () => {
 const styles = {
   container: {
     display: 'flex',
-    height: '100vh',
+    minHeight: '100%',
     backgroundColor: '#000',
     color: '#fff',
     fontFamily: "'Cinzel', serif",
-    overflow: 'hidden',
-    '@media (max-width: 900px)': {
-      flexDirection: 'column'
-    }
+    overflow: 'auto',
+    flexDirection: { xs: 'column', md: 'row' }
   },
   carouselContainer: {
     flex: 2,
@@ -183,15 +180,16 @@ const styles = {
     position: 'relative',
     zIndex: 2,
     backgroundColor: 'rgba(0,0,0,0.7)',
-    padding: '30px',
+    padding: { xs: '15px', md: '30px' },
     borderRadius: '12px',
-    maxWidth: '600px',
+    maxWidth: { xs: '100%', md: '600px' },
     backdropFilter: 'blur(5px)',
-    border: '1px solid rgba(255, 215, 0, 0.3)'
+    border: '1px solid rgba(255, 215, 0, 0.3)',
+    marginTop: { xs: '20px', md: 0 }
   },
   iconContainer: {
     color: '#FFD700',
-    marginBottom: '20px'
+    marginBottom: { xs: '10px', md: '20px' }
   },
   captionTitle: {
     color: '#FFD700',
@@ -200,12 +198,11 @@ const styles = {
     textShadow: '0 0 10px rgba(255, 215, 0, 0.5)'
   },
   captionText: {
-    color: '#fff',
-    fontSize: '1.1rem'
+    color: '#fff'
   },
   indicators: {
     position: 'absolute',
-    bottom: '40px',
+    bottom: { xs: '10px', md: '40px' },
     left: '50%',
     transform: 'translateX(-50%)',
     display: 'flex',
@@ -225,25 +222,19 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: '40px',
-    '@media (max-width: 900px)': {
-      padding: '20px'
-    }
+    padding: { xs: '20px', md: '40px' },
+    overflow: 'auto'
   },
   formContainer: {
     width: '100%',
-    maxWidth: '400px',
+    maxWidth: { xs: '100%', md: '400px' },
     backgroundColor: 'rgba(34, 34, 34, 0.8)',
-    padding: '40px',
+    padding: { xs: '20px', md: '40px' },
     borderRadius: '16px',
     boxShadow: '0 0 30px rgba(255, 215, 0, 0.2)',
     border: '1px solid rgba(255, 215, 0, 0.2)',
     backdropFilter: 'blur(5px)',
-    position: 'relative',
-    '@media (max-width: 900px)': {
-      padding: '30px',
-      maxWidth: '100%'
-    }
+    position: 'relative'
   },
   toggleButton: {
     mt: 3,

@@ -4,9 +4,10 @@ import {
   Box, TextField, Checkbox, FormControlLabel, Typography, 
   Alert, Button, CircularProgress, Link, InputAdornment 
 } from '@mui/material';
-import { Person, Email, Lock, HowToReg, Assignment, PrivacyTip } from '@mui/icons-material';
+import { Person, Email, Lock, HowToReg, Assignment} from '@mui/icons-material';
 import { AuthContext } from '../context/AuthContext';
 import api from '../services/api';
+import Terminos from './Terminos';
 
 const RegisterForm = () => {
   const [formData, setFormData] = useState({
@@ -17,6 +18,7 @@ const RegisterForm = () => {
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const {login } = useContext(AuthContext);
   const navigate = useNavigate();
+  const [showTerms, setShowTerms] = useState(false);
 
   // Estilos reutilizables
   const styles = {
@@ -178,17 +180,16 @@ const RegisterForm = () => {
         label={
           <Typography variant="body2" sx={{ color: '#ccc' }}>
             Acepto los{' '}
-            <Link href="/terminos" underline="hover" sx={{ color: '#FFD700', '&:hover': { color: '#FFA500' } }}>
-              <Assignment fontSize="small" sx={{ verticalAlign: 'middle', mr: 0.5 }} />
-              Términos
-            </Link>{' '}
-            y la{' '}
-            <Link href="/privacidad" underline="hover" sx={{ color: '#FFD700', '&:hover': { color: '#FFA500' } }}>
-              <PrivacyTip fontSize="small" sx={{ verticalAlign: 'middle', mr: 0.5 }} />
-              Privacidad
-            </Link>
+            <Button
+              onClick={() => setShowTerms(true)}
+              startIcon={<Assignment fontSize="small" sx={{ color: '#FFD700' }} />}
+              sx={{ p: 0, minWidth: 0, color: '#FFD700', '&:hover': { background: 'none', color: '#FFA500' } }}
+            >
+              Términos y Condiciones
+            </Button>
           </Typography>
         }
+
       />
       {errors.acceptTerms && <Typography variant="caption" color="error" sx={{ ml: 6.5 }}>{errors.acceptTerms}</Typography>}
 
@@ -215,7 +216,11 @@ const RegisterForm = () => {
         </svg>
         Al registrarte, confirmas que eres mayor de 18 años.
       </Typography>
+
+       <Terminos open={showTerms} onClose={() => setShowTerms(false)} />
+
     </Box>
+    
   );
 };
 
