@@ -270,6 +270,14 @@ useEffect(() => {
   Fondos: ${user.fondos}
 </Typography>
 
+{error && (
+  <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
+    <Alert severity="error" role="alert" sx={{ width: '100%', maxWidth: 500 }}>
+      {error}
+    </Alert>
+  </Box>
+)}
+
 {/* Cartas de ejemplo al inicio */}
 {!jugando && jugador.length === 0 && (
   <Box
