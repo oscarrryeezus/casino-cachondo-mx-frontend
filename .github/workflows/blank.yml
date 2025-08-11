@@ -42,7 +42,7 @@ jobs:
           docker build -t luisrollo/frontend-app:latest .
           docker push luisrollo/frontend-app:latest
 
-      # 7. Autenticarse en Azure CLI
+      # 7. Autenticarse en Azure CLI 
       - name: Log in to Azure CLI
         uses: azure/login@v1
         with:
