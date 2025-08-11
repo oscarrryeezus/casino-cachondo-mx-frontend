@@ -50,8 +50,6 @@ const Saldo = () => {
     return errs;
   };
 
-  const simulateDelay = ms => new Promise(res => setTimeout(res, ms));
-
   const handleAddCard = async () => {
     setGlobalError('');
     setSuccessMsg('');
@@ -63,12 +61,9 @@ const Saldo = () => {
     setFieldErrors({});
     setLoadingAdd(true);
     setStepAdd('Verificando datos de la tarjeta...');
-    await simulateDelay(1500);
     setStepAdd('Contactando al banco emisor...');
-    await simulateDelay(1500);
     try {
       const { data } = await api.post('/usuario/cards', newCard);
-      await simulateDelay(1000);
       setCards(prev => [...prev, data.tarjeta]);
       setNewCard({ numero: '', mm: '', yyyy: '', cvv: '' });
       setSuccessMsg('Tarjeta registrada con éxito. ¡Listo para usar!');
@@ -90,11 +85,8 @@ const Saldo = () => {
 
     setLoadingPay(true);
     setStepPay('Iniciando transacción...');
-    await simulateDelay(1000);
     setStepPay('Verificando fondos...');
-    await simulateDelay(1000);
     setStepPay('Procesando con el procesador de pagos...');
-    await simulateDelay(2000);
     try {
       const { data } = await api.post('/usuario/pay', { cardId: selectedCard, amount: value });
       updateBalance(data.fondos);
