@@ -49,9 +49,18 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       # 8. Actualizar contenedor en Azure Container Instances
-      - name: Update Azure Container Instance
+      - name: Delete Azure Container Instance
         run: |
-          az container update \
+          az container delete --resource-group tutankamon --name frontend-app --yes --no-wait
+
+      - name: Create Azure Container Instance
+        run: |
+          az container create \
             --resource-group tutankamon \
             --name frontend-app \
-            --image luisrollo/frontend-app:latest
+            --image luisrollo/frontend-app:latest \
+            --cpu 1 \
+            --memory 1.5 \
+            --ports 80 443 \
+            --dns-name-label frontend-app-tutankamon \
+            --restart-policy Always
