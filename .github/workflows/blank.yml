@@ -64,3 +64,4 @@ jobs:
             --ports 80 443 \
             --dns-name-label frontend-app-tutankamon \
             --restart-policy Always
+            --os-type Linux
