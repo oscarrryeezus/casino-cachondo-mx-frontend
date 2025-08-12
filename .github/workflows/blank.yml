@@ -63,5 +63,5 @@ jobs:
             --memory 1.5 \
             --ports 80 443 \
             --dns-name-label frontend-app-tutankamon \
-            --restart-policy Always
-            --osType Linux
+            --restart-policy Always \
+            --os-type Linux
